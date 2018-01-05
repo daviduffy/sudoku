@@ -1,0 +1,161 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #fff;
+    font-family: "Helvetica Neue", Helvectica, Arial, serif;
+    font-size: calc(12px + 2vw);
+    color: #666;
+    text-align: center;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+h1 {
+    font-weight: 500;
+    color: #384047;
+    font-size: 3rem;
+    margin: 60px 0 10px;
+}
+
+p {
+    font-size: 1.125rem;
+}
+
+
+.grid {
+    margin: 0 auto 5vw;
+    width: 100%;
+    padding: 0;
+    max-width: 899px; /* I don't know */
+    list-style-type: none;
+}
+
+li {
+    display: inline-block;
+    position: relative;
+    width: 10vw;
+    max-width: 90px; 
+    height: 10vw;
+    max-height: 90px;
+    border-top: 1px solid;
+    border-left: 1px solid; 
+}
+
+span,
+input[type="number"] {
+    display: inline-block;
+    position: absolute;
+    width: calc(10px + 2vw);
+    height: calc(18px + 2vw);
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.user-input span {
+    color: black;
+    font-weight: bold;
+}
+
+input[type="number"] {
+    font-size: inherit;
+    border: none;
+    padding: 35%;
+    width: 95%;
+    height: 95%;
+}
+                                              /* this is ugly, but it creates the grid */
+li:nth-child(3n) {
+    border-right: 2px solid #888;             /* heavy column */
+}
+li:nth-child(-n + 9){
+    border-top: 2px solid #444;              /* container top */
+}
+li:nth-child(9n + 1){
+    border-left: 2px solid #444;             /* container left */
+}
+li:nth-child(9n) {
+    border-right: 2px solid #444;            /* container right */
+}
+li:nth-child(n+19) {
+    border-bottom: 2px solid #888;            /* heavy row top */
+}
+li:nth-child(n+28){
+    border-bottom: none                       /* row cancel */
+}
+li:nth-child(n+46) {
+    border-bottom: 2px solid #888;            /* heavy row bottom */
+}
+li:nth-child(n+55){
+    border-bottom: none                       /* row cancel */
+}
+li:nth-child(n + 73){
+    border-bottom: 2px solid #444;           /* container bottom */
+}
+
+
+button {
+    cursor: pointer;
+    width: 50vw;
+    max-width: 350px;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    font-size: inherit;
+    border: none;
+    border-radius: 2px;
+}
+button:focus {
+    outline: none;
+}
+button:nth-child(1){
+    color: white;
+    background-color: #f90;
+}
+button:nth-child(2){
+    border: 1px solid;
+}
+button:last-child{
+    color: black;
+    background-color: transparent;
+    border: 1px solid;
+}
+
+/* Grid styles if supports */
+@supports (display: grid) {
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        width: 500px;
+        height: 500px;
+        margin: 0 auto 2rem;
+    }
+    li {
+        width: initial;
+        max-width: initial;
+        height: initial;
+        max-height: initial;
+    }
+    .grid.control {
+        grid-auto-rows: 60px;
+    }
+    button {
+        width: initial;
+        max-width: initial;
+        font-size: 1.4rem;
+        padding: initial;
+    }
+    button:nth-child(1) {
+    grid-column: 1 / span 4;
+    }
+    button:nth-child(2) {
+        grid-column: 6 / span 4;
+    }
+}
