@@ -1,5 +1,6 @@
 // UI Logic
 // ========
+const input = document.createElement('input')
 const initUI = () => {
   // should be global state, supposed to indicate that a user had interacted but only works 1 way
   let UIActive = false;
@@ -40,7 +41,7 @@ const initUI = () => {
         }
         li.removeChild(nInput);
         li.appendChild(span);
-        if ( UIActive === true ) {
+        if (UIActive === true) {
           document.getElementById('run_puzzle').innerHTML = 'Solve Sudoku' ;
         }
       });      
@@ -52,7 +53,7 @@ const initUI = () => {
 
 // Puzzle Logic
 // ============
-var init = function( run ){
+const init = function (run) {
   const cellWidth = 3;
   const sideLength = cellWidth * cellWidth;
   const guessIndex = 0;
@@ -69,53 +70,29 @@ var init = function( run ){
       userValue: null,
     });
   }
-  
+
   // generate a solved puzzle
   if (run === 1) {
-    return makeGuess( sideLength, allGuesses, guessIndex, limit, true );    
-  }
-  
-  if ( run === 2 ) {
-    // place first group of 9 and then solve puzzle
-    // turboStart( cellWidth, sideLength, allGuesses );
-    // console.log("current puzzle ",allGuesses);
-    // doMarkup( allGuesses )
-    
-    var LIs = document.getElementsByTagName('li');
-    for (var y = 0; y < LIs.length; y++) {
-      currentLI = LIs[y];
-      if ( currentLI.classList.contains('user-input') ) {
-        // console.log('cell ' + y + ' has value ' + currentLI)
-        var currentSpan = currentLI.querySelector('span');
-        allGuesses[y].value = parseInt(currentSpan.innerHTML);
-        allGuesses[y].userValue = parseInt(currentSpan.innerHTML);
+    return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
+  } else if ( run === 2 ) {    
+    var LIs = document.querySelectorAll('li');
+    LIs.forEach((li, index) => {
+      if (li.classList.contains('user-input')) {
+        // console.log('cell ' + y + ' has value ' + li)
+        var val = li.querySelector('span').innerHTML;
+        allGuesses[index].value = parseInt(val, 10);
+        allGuesses[index].userValue = parseInt(val, 10);
         // console.log(allGuesses[y]);
       }
-    }
+    });
+
     return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
     
-  } if ( run === 3 ) {
+  } else if ( run === 3 ) {
     doMarkup( createSequencedArray(81) );
     initUI();
   }
-
-}
-
-// var turboStart = function ( cellWidth, sideLength, allGuesses ) {
-//   var rAr = randArray( sideLength )
-//     , startIndex = sideLength * cellWidth + cellWidth
-//     , float = null
-//     ;
-//   // console.log(cellWidth, sideLength, allGuesses)
-//   for ( var i = 0; i < cellWidth; i++ ) {
-//     for ( var j = 0; j < cellWidth; j++ ) {
-//       float = rAr.splice(~~(Math.random() * rAr.length),1)[0];
-//       var bub = allGuesses[startIndex + (i*sideLength) + j];
-//       // console.log(bub);
-//       bub.value = float;
-//     }   
-//   }
-// }
+};
 
 var createSequencedArray = function( lim ) {
   var arr = [];
@@ -123,7 +100,7 @@ var createSequencedArray = function( lim ) {
     arr.push(f);
   }
   return arr;
-}
+};
 
 var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
   // console.log('starting makeGuess, guessIndex:', guessIndex) // advanced logging
@@ -144,7 +121,7 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
       
       // if this is not user input
       if ( currentGuess.userValue ) {
-        console.log('user input skipped on cycle: ' + guessIndex);
+        // console.log('user input skipped on cycle: ' + guessIndex);
         if ( forward ) {
           guessIndex++;
           return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
