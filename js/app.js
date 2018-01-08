@@ -16,21 +16,18 @@ const getInitialState = (num) => {
     sideLength: num * num,
     guessIndex: 0,
     limit: (num * num) * (num * num),
+    forward: true,
   };
-  const allGuesses = [];
-  // fill up main arrays with unique instances of `singleGuess`
-  for (let b = 0; b < init.limit; b++) {
-    allGuesses.push({
-      options: createSequencedArray(init.sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      value: null,
-      index: b,
-      userValue: null,
-    });
-  }
+  // fast way to create an array of these objects
+  const allGuesses = Array(init.limit).fill(null).map((e, index) => ({
+    options: createSequencedArray(init.sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    value: null,
+    index,
+    userValue: null,
+  }));
   init.allGuesses = allGuesses;
   return init;
 };
-const state = getInitialState(3);
 
 // UI Logic
 // =================================================================================================
@@ -50,39 +47,24 @@ const initUI = () => {
 // Puzzle Logic
 // =================================================================================================
 const init = function (run) {
-  const cellWidth = 3;
-  const sideLength = cellWidth * cellWidth;
-  const guessIndex = 0;
-  const limit = sideLength * sideLength;
-
-  const allGuesses = [];
-
-  // fill up main arrays with unique instances of `singleGuess`
-  for (let b = 0; b < limit; b++) {
-    allGuesses.push({
-      options: createSequencedArray(sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      value: null,
-      index: b,
-      userValue: null,
-    });
-  }
+  const state = getInitialState(3);
 
   // generate a solved puzzle
   if (run === 1) {
-    return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
+    return makeGuess(state);
   } else if ( run === 2 ) {    
     var LIs = document.querySelectorAll('li');
     LIs.forEach((li, index) => {
       if (li.classList.contains('user-input')) {
         const val = li.querySelector('input').value;
         // console.log('cell ' + y + ' has value ' + li)
-        allGuesses[index].value = parseInt(val, 10);
-        allGuesses[index].userValue = parseInt(val, 10);
+        state.allGuesses[index].value = parseInt(val, 10);
+        state.allGuesses[index].userValue = parseInt(val, 10);
         // console.log(allGuesses[y]);
       }
     });
 
-    return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
+    return makeGuess(state);
     
   } else if ( run === 3 ) {
     doMarkup( createSequencedArray(81) );
@@ -90,7 +72,7 @@ const init = function (run) {
   }
 };
 
-var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
+const makeGuess = function({ sideLength, allGuesses, guessIndex, limit, forward }){
   // console.log('starting makeGuess, guessIndex:', guessIndex) // advanced logging
   if (guessIndex < limit) {
 
@@ -102,7 +84,7 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
     if (currentGuess.options.length !== 0) {
     
       // get row, column, and square array contexts for current guess value
-      var currentContext = getXYSquare( sideLength, allGuesses, guessIndex );
+      var currentContext = getXYSquare({ sideLength, allGuesses, guessIndex });
       // console.log(currentContext); // advanced logging
       
       // console.log(currentGuess);
@@ -112,59 +94,41 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
         // console.log('user input skipped on cycle: ' + guessIndex);
         if (forward) {
           guessIndex++;
-          return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
+          forward = true;
+          return makeGuess({ sideLength, allGuesses, guessIndex, limit, forward });
 
         } else {
           guessIndex--;
-          return makeGuess( sideLength, allGuesses, guessIndex, limit, false );
+          forward = false;
+          return makeGuess({ sideLength, allGuesses, guessIndex, limit, forward });
         }
 
       }
         
       // assign a random integer from the guess.options
       currentGuess.value = currentGuess.options.splice(~~(Math.random()*currentGuess.options.length),1)[0]; 
-      // console.warn("on ", guessIndex, " guessing ", currentGuess.value) // basic logging
-
       // if the random guess value is not in the row array
       if ( currentContext.row.indexOf(currentGuess.value) === -1 ) {
-        // console.log('row passed') // advanced logging
-
         // vertical plane tests
         if ( currentContext.column.indexOf(currentGuess.value) === -1 ) {
-          // console.log( 'column passed' ); // advanced logging
-
           // square in grid tests
           if ( currentContext.square.indexOf(currentGuess.value) === -1 ) {
-
             // increment the cell you're move to the next index
             guessIndex++;
-            // console.log('square passed'); // advanced logging
-            // console.log('good guess! on ', guessIndex, " value ", currentGuess.value); // advanced logging
-
-            return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
-
+            forward = true;
+            return makeGuess({ sideLength, allGuesses, guessIndex, limit, forward });
           }
-
         }
-
       }
-
-      // console.log('change guess');
-    
-      
     // this guess value is impossible because a previous guess is incorrect
     } else {
-
-      // console.error("failure at ", currentGuess, "Rewind.") // basic logging
       currentGuess.options = createSequencedArray(sideLength);
       currentGuess.value = null;
-      // console.log("reset: ", currentGuess)
-      guessIndex--;
-          
+      guessIndex--;          
     }
     
-    // bad guess
-    return makeGuess( sideLength, allGuesses, guessIndex, limit, false );
+    forward = false;
+    return makeGuess({ sideLength, allGuesses, guessIndex, limit, forward });
 
   }
   // console.log(allGuesses, "makeGuess");
@@ -172,9 +136,8 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
 };
 
 
-var getXYSquare = function( sideLength, allGuesses, guessIndex ){
-  
-  var XYS = { // ex: 52
+var getXYSquare = function({ sideLength, allGuesses, guessIndex }){
+  const XYS = { // ex: 52
     rowNumber: ~~( guessIndex / sideLength ),    //  5
     get rowStartIndex () { 
       return this.rowNumber * sideLength;      // 45
@@ -182,23 +145,20 @@ var getXYSquare = function( sideLength, allGuesses, guessIndex ){
     get rowSquareIndex () {
       return ~~(this.rowNumber/3) * 3;       //  3
     },
-    
     colStartIndex: (guessIndex % sideLength || 0),      //  7
     get colSquareIndex () {
       return ~~(this.colStartIndex/3) * 3;     //  6
     },
-    
     get squareStartIndex () { 
       return this.rowSquareIndex * sideLength + this.colSquareIndex; // 33
     },
-  }
-  // console.log(XYS)
-  var outputArrays = {
+  };
+  const outputArrays = {
     row: [],
     column: [],
     square: [],
-  }
-  
+  };
+
   //build row indexes array
   for ( var r = 0; r < sideLength; r++ ) {
     var rowStartIndex = XYS.rowStartIndex;
@@ -223,28 +183,31 @@ var getXYSquare = function( sideLength, allGuesses, guessIndex ){
 };
 
 // Creates the markup for the grid layout
-var doMarkup = function( allGuesses ) {
-  
-  var container = document.getElementById('container');
-  container.innerHTML = '';
-  
-  
-  //create parent DIV to house our ULs
-  var grid = document.createElement('UL');
-  grid.className = 'grid';
-  for (var i = 0; i < allGuesses.length; i++ ) {
-    var li = document.createElement('LI');
-    li.setAttribute('data-index', i);
-    if (allGuesses[i].userValue) {
-      li.classList.add('user-input');
-    }
-    const input = `<input type="number" 
-                          maxlength='1' 
-                          value="${allGuesses[i].value || ''}"
-                          pattern="[0-9]{1}">`;
-    li.innerHTML = input;
-    grid.appendChild(li);
+const doMarkup = function( allGuesses ) {
+  const container = document.getElementById('container');
+  // empty the container. faster than innerHTML = ''
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
   }
+  const grid = document.createElement('UL');
+  grid.className = 'grid';
+  html = allGuesses.map((guess, index) => 
+    `<li data-index="${index}" ${guess.userValue ? 'class="user-input"' : null}>
+      <input type="number" 
+        maxlength='1' 
+        value="${allGuesses[index].value || ''}"
+        pattern="[0-9]{1}">
+    </li>`).join('');
+  // for (var i = 0; i < allGuesses.length; i++ ) {
+  //   var li = document.createElement('LI');
+  //   li.setAttribute('data-index', i);
+  //   if (allGuesses[i].userValue) {
+  //     li.classList.add('user-input');
+  //   }
+  //   const input = ``;
+  //   li.innerHTML = input;
+  grid.innerHTML = html;
+  
   container.appendChild(grid);
 };
 
@@ -270,4 +233,4 @@ document.getElementById('run_puzzle').addEventListener("click", function(){
 document.getElementById('clear_puzzle').addEventListener("click", function(){
   document.getElementById('run_puzzle').innerHTML = 'Generate Sudoku' ;
   init(3);
-})
+});
