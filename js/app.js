@@ -1,58 +1,54 @@
+// Array building utility
+// =================================================================================================
+var createSequencedArray = function( lim ) {
+  var arr = [];
+  for ( var f = 1; f <= lim; f++ ) {
+    arr.push(f);
+  }
+  return arr;
+};
+
+// Initial State
+// =================================================================================================
+const getInitialState = (num) => {
+  const init = {
+    cellWidth: num,
+    sideLength: num * num,
+    guessIndex: 0,
+    limit: (num * num) * (num * num),
+  };
+  const allGuesses = [];
+  // fill up main arrays with unique instances of `singleGuess`
+  for (let b = 0; b < init.limit; b++) {
+    allGuesses.push({
+      options: createSequencedArray(init.sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      value: null,
+      index: b,
+      userValue: null,
+    });
+  }
+  init.allGuesses = allGuesses;
+  return init;
+};
+const state = getInitialState(3);
+
 // UI Logic
-// ========
-const input = document.createElement('input')
+// =================================================================================================
 const initUI = () => {
-  // should be global state, supposed to indicate that a user had interacted but only works 1 way
-  let UIActive = false;
-  document.querySelectorAll('LI').forEach((li) => {
-    li.addEventListener('click', function (elem) {
-      // get current value of cell
-      const span = this.querySelector('SPAN');
-      const val = span.innerHTML;
-
-      // create input element
-      // should limit to 1 char & validate
-      const input = document.createElement('INPUT');
-      const dataIndex = this.getAttribute('data-index');
-      input.setAttribute('type', 'number');
-      input.setAttribute('id', `li_${dataIndex}`);
-
-      // set value of input element if there is one
-      if (parseInt(val, 10)) {
-        input.setAttribute('value', val);
+  document.querySelectorAll('input').forEach((input) => {
+    input.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      // this is jank
+      if (['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'].includes(e.key)) {
+        input.value = e.key;
+        input.parentNode.classList.add('user-input');
       }
-
-      // remove span, add input
-      this.removeChild(span);
-      this.appendChild(input);
-
-      // focus new input element
-      input.focus();
-
-      // event listener to turn input back into span
-      input.addEventListener('focusout', function () {
-        const nInput = document.getElementById(this.getAttribute('id'));
-        // is this a reference to the span above? does it need to be?
-        span.innerHTML = nInput.value;
-        const li = nInput.parentNode;
-        if ( nInput.value ) {
-          li.setAttribute('class', 'user-input');
-          UIActive = true;
-        }
-        li.removeChild(nInput);
-        li.appendChild(span);
-        if (UIActive === true) {
-          document.getElementById('run_puzzle').innerHTML = 'Solve Sudoku' ;
-        }
-      });      
     });
   });
 };
 
-
-
 // Puzzle Logic
-// ============
+// =================================================================================================
 const init = function (run) {
   const cellWidth = 3;
   const sideLength = cellWidth * cellWidth;
@@ -64,7 +60,7 @@ const init = function (run) {
   // fill up main arrays with unique instances of `singleGuess`
   for (let b = 0; b < limit; b++) {
     allGuesses.push({
-      options: createSequencedArray( sideLength ), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      options: createSequencedArray(sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
       value: null,
       index: b,
       userValue: null,
@@ -78,8 +74,8 @@ const init = function (run) {
     var LIs = document.querySelectorAll('li');
     LIs.forEach((li, index) => {
       if (li.classList.contains('user-input')) {
+        const val = li.querySelector('input').value;
         // console.log('cell ' + y + ' has value ' + li)
-        var val = li.querySelector('span').innerHTML;
         allGuesses[index].value = parseInt(val, 10);
         allGuesses[index].userValue = parseInt(val, 10);
         // console.log(allGuesses[y]);
@@ -94,24 +90,16 @@ const init = function (run) {
   }
 };
 
-var createSequencedArray = function( lim ) {
-  var arr = [];
-  for ( var f = 1; f <= lim; f++ ) {
-    arr.push(f);
-  }
-  return arr;
-};
-
 var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
   // console.log('starting makeGuess, guessIndex:', guessIndex) // advanced logging
-  if ( guessIndex < limit ) {
+  if (guessIndex < limit) {
 
-    // use the current `guessIndex` value to get a guess from allGuesses 
+    // use the current `guessIndex` value to get a guess from allGuesses
     var currentGuess = allGuesses[guessIndex];
     // console.log(currentGuess); // advanced logging
     
     // see if this guess still has available options
-    if ( currentGuess.options.length !== 0) {
+    if (currentGuess.options.length !== 0) {
     
       // get row, column, and square array contexts for current guess value
       var currentContext = getXYSquare( sideLength, allGuesses, guessIndex );
@@ -120,9 +108,9 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
       // console.log(currentGuess);
       
       // if this is not user input
-      if ( currentGuess.userValue ) {
+      if (currentGuess.userValue) {
         // console.log('user input skipped on cycle: ' + guessIndex);
-        if ( forward ) {
+        if (forward) {
           guessIndex++;
           return makeGuess( sideLength, allGuesses, guessIndex, limit, true );
 
@@ -181,7 +169,6 @@ var makeGuess = function( sideLength, allGuesses, guessIndex, limit, forward ){
   }
   // console.log(allGuesses, "makeGuess");
   doMarkup( allGuesses );
-
 };
 
 
@@ -231,11 +218,8 @@ var getXYSquare = function( sideLength, allGuesses, guessIndex ){
       var val = allGuesses[XYS.squareStartIndex + ((sr * 9) + sc)].value;
       outputArrays.square.push(val);
     }
-    
   }
-  
   return outputArrays;
-  
 };
 
 // Creates the markup for the grid layout
@@ -248,19 +232,18 @@ var doMarkup = function( allGuesses ) {
   //create parent DIV to house our ULs
   var grid = document.createElement('UL');
   grid.className = 'grid';
-  
   for (var i = 0; i < allGuesses.length; i++ ) {
-    
     var li = document.createElement('LI');
-    li.setAttribute('data-index', i );
-    if ( allGuesses[i].userValue ) {
-      li.setAttribute('class', 'user-input');
+    li.setAttribute('data-index', i);
+    if (allGuesses[i].userValue) {
+      li.classList.add('user-input');
     }
-    var span = document.createElement('SPAN');
-    span.innerHTML = ( allGuesses[i].value || '' );
-    li.appendChild(span);
+    const input = `<input type="number" 
+                          maxlength='1' 
+                          value="${allGuesses[i].value || ''}"
+                          pattern="[0-9]{1}">`;
+    li.innerHTML = input;
     grid.appendChild(li);
-    
   }
   container.appendChild(grid);
 };

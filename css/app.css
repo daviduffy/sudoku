@@ -60,7 +60,7 @@ input[type="number"] {
     left: 0;
 }
 
-.user-input span {
+.user-input input {
     color: black;
     font-weight: bold;
 }
@@ -68,7 +68,7 @@ input[type="number"] {
 input[type="number"] {
     font-size: inherit;
     border: none;
-    padding: 35%;
+    padding: 28%;
     width: 95%;
     height: 95%;
 }
