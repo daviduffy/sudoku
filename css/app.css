@@ -1,13 +1,76 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-body {
-    background: #fff;
-    font-family: "Helvetica Neue", Helvectica, Arial, serif;
-    font-size: calc(12px + 2vw);
-    color: #666;
-    text-align: center;
+.container {
+  display: grid;
+  background: #fff;
+  font-family: "Helvetica Neue", Helvectica, Arial, serif;
+  font-size: 1.067rem;
+  color: #666;
+  text-align: center;
+}
+@media screen and (min-width: 37.5rem) {
+  .container {
+    font-size: calc(1.067rem + .183 * ((100vw - 37.5rem)/ 42.5));
+  }
+}
+@media screen and (min-width: 80rem) {
+  .container {
+    font-size: 1.25rem;
+  }
+}
+
+.h1 {
+  font-weight: 500;
+  color: #384047;
+  font-size: 1.29616rem;
+  margin: 60px 0 10px;
+}
+@media screen and (min-width: 37.5rem) {
+  .h1 {
+    font-size: calc(1.29616rem + 1.14525 * ((100vw - 37.5rem)/ 42.5));
+  }
+}
+@media screen and (min-width: 80rem) {
+  .h1 {
+    font-size: 2.44141rem;
+  }
+}
+
+.h4 {
+  font-size: 1.13849rem;
+}
+
+@media screen and (min-width: 37.5rem) {
+  .h4 {
+    font-size: calc(1.13849rem + .42401 * ((100vw - 37.5rem)/ 42.5));
+  }
+}
+@media screen and (min-width: 80rem) {
+  .h4 {
+    font-size: 1.5625rem;
+  }
+}
+
+.puzzle {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  width: calc(100vw - 1rem);
+  height: calc(100vw - 1rem);
+  margin: 0 auto;
+  padding: 0;
+}
+@media screen and (min-width: 37.5rem) {
+  .puzzle {
+    width: calc(600px + 2vw);
+    height: calc(600px + 2vw);
+  }
+}
+
+.controls {
+  padding: 1rem 0;
 }
 
 input[type=number]::-webkit-inner-spin-button, 
@@ -16,146 +79,97 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0; 
 }
 
-h1 {
-    font-weight: 500;
-    color: #384047;
-    font-size: 3rem;
-    margin: 60px 0 10px;
-}
-
-p {
-    font-size: 1.125rem;
-}
-
-
-.grid {
-    margin: 0 auto 5vw;
-    width: 100%;
-    padding: 0;
-    max-width: 899px; /* I don't know */
-    list-style-type: none;
-}
-
 li {
-    display: inline-block;
-    position: relative;
-    width: 10vw;
-    max-width: 90px; 
-    height: 10vw;
-    max-height: 90px;
-    border-top: 1px solid;
-    border-left: 1px solid; 
+  display: inline-block;
+  position: relative;
+  border-top: 1px solid;
+  border-left: 1px solid; 
 }
 
 span,
 input[type="number"] {
-    display: inline-block;
-    position: absolute;
-    width: calc(10px + 2vw);
-    height: calc(18px + 2vw);
-    margin: auto;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  display: inline-block;
+  position: absolute;
+  width: calc(10px + 2vw);
+  height: calc(18px + 2vw);
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
-.user-input input {
-    color: black;
-    font-weight: bold;
+.game-value input,
+.user-value input {
+  font-weight: bold;
+}
+
+.game-value input {
+  color: black;
+}
+.user-value input {
+  color: #2980b9;
 }
 
 input[type="number"] {
-    font-size: inherit;
-    border: none;
-    padding: 28%;
-    width: 95%;
-    height: 95%;
+  font-size: inherit;
+  border: none;
+  padding: 33%;
+  width: 95%;
+  height: 95%;
 }
-                                              /* this is ugly, but it creates the grid */
+                        /* this is ugly, but it creates the grid */
 li:nth-child(3n) {
-    border-right: 2px solid #888;             /* heavy column */
+  border-right: 2px solid #888;       /* heavy column */
 }
 li:nth-child(-n + 9){
-    border-top: 2px solid #444;              /* container top */
+  border-top: 2px solid #444;        /* container top */
 }
 li:nth-child(9n + 1){
-    border-left: 2px solid #444;             /* container left */
+  border-left: 2px solid #444;       /* container left */
 }
 li:nth-child(9n) {
-    border-right: 2px solid #444;            /* container right */
+  border-right: 2px solid #444;      /* container right */
 }
 li:nth-child(n+19) {
-    border-bottom: 2px solid #888;            /* heavy row top */
+  border-bottom: 2px solid #888;      /* heavy row top */
 }
 li:nth-child(n+28){
-    border-bottom: none                       /* row cancel */
+  border-bottom: none             /* row cancel */
 }
 li:nth-child(n+46) {
-    border-bottom: 2px solid #888;            /* heavy row bottom */
+  border-bottom: 2px solid #888;      /* heavy row bottom */
 }
 li:nth-child(n+55){
-    border-bottom: none                       /* row cancel */
+  border-bottom: none             /* row cancel */
 }
 li:nth-child(n + 73){
-    border-bottom: 2px solid #444;           /* container bottom */
+  border-bottom: 2px solid #444;       /* container bottom */
 }
 
-
-button {
-    cursor: pointer;
-    width: 50vw;
-    max-width: 350px;
-    margin-bottom: 0.5rem;
-    padding: 1rem;
-    font-size: inherit;
-    border: none;
-    border-radius: 2px;
+.btn {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  font-size: inherit;
+  border: 1px solid;
+  border-radius: 2px;
+  background-color: transparent;
 }
-button:focus {
-    outline: none;
+.btn:focus {
+  outline: none;
 }
-button:nth-child(1){
-    color: white;
-    background-color: #f90;
+.btn--action{
+  color: white;
+  background-color: #f90;
+  border: none;
 }
-button:nth-child(2){
-    border: 1px solid;
+.btn--easy {
+  background-color: #2ecc71;
 }
-button:last-child{
-    color: black;
-    background-color: transparent;
-    border: 1px solid;
+.btn--medium {
+  background-color: #e67e22;
 }
-
-/* Grid styles if supports */
-@supports (display: grid) {
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(9, 1fr);
-        width: 500px;
-        height: 500px;
-        margin: 0 auto 2rem;
-    }
-    li {
-        width: initial;
-        max-width: initial;
-        height: initial;
-        max-height: initial;
-    }
-    .grid.control {
-        grid-auto-rows: 60px;
-    }
-    button {
-        width: initial;
-        max-width: initial;
-        font-size: 1.4rem;
-        padding: initial;
-    }
-    button:nth-child(1) {
-    grid-column: 1 / span 4;
-    }
-    button:nth-child(2) {
-        grid-column: 6 / span 4;
-    }
+.btn--hard {
+  background-color: #c0392b;
 }

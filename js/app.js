@@ -4,30 +4,64 @@ const createSequencedArray = lim => Array(lim).fill(null).map((e, index) => (ind
 
 // Array building utility
 // =================================================================================================
-const randArray = (sideLength) => {
-  const donor = createSequencedArray(sideLength);
+const randArray = ({ desired, max }) => {
+  const donor = createSequencedArray(max);
   const rand = [];
-  for (let i = 0; i < sideLength; i++) {
-    const float = donor.splice(~~(Math.random() * donor.length),1)[0];
+  for (let i = 0; i < desired; i++) {
+    const float = donor.splice(~~(Math.random() * donor.length), 1)[0];
     rand.push(float);
   }
   return rand;
 };
 
+// Game version creator
+// =================================================================================================
+const getGameIndex = ({ limit, diff }) => {
+  let desired;
+  switch (diff) {
+    default:
+      desired = limit;
+      break;
+    case 1:
+      desired = 35;
+      break;
+    case 2:
+      desired = 30;
+      break;
+    case 3:
+      desired = 25;
+      break;
+    case 4:
+      desired = 20;
+      break;
+  }
+  return randArray({
+    desired,
+    max: limit,
+  });
+};
+
 // Initial State
 // =================================================================================================
-const getInitialState = (num) => {
+const getInitialState = (num, diff = undefined) => {
+  // when defined, difficulty causes value visibility to change
   const init = {
     cellWidth: num,
     sideLength: num * num,
     guessIndex: 0,
     limit: (num * num) * (num * num),
     forward: true,
+    gameIndex: diff ? getGameIndex({
+      limit: (num * num) * (num * num),
+      diff
+    }) : undefined,
+    diff,
   };
   // fast way to create an array of these objects
   const allGuesses = Array(init.limit).fill(null).map((e, index) => ({
     options: createSequencedArray(init.sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
     value: null,
+    visible: diff ? init.gameIndex.includes(index) : true,
     index,
     userValue: null,
   }));
@@ -37,7 +71,7 @@ const getInitialState = (num) => {
 
 // UI Logic
 // =================================================================================================
-const initUI = () => {
+const addListeners = () => {
   document.querySelectorAll('input').forEach((input) => {
     input.addEventListener('keydown', (e) => {
       e.preventDefault();
@@ -94,28 +128,38 @@ const getXYSquare = ({ sideLength, allGuesses, guessIndex }) => {
 
 // Create the markup with values from guesses
 // =================================================================================================
-const doMarkup = (allGuesses) => {
-  const container = document.getElementById('container');
+const doMarkup = ({ allGuesses, gameIndex }) => {
+  const puzzle = document.getElementById('puzzle');
   // empty the container. faster than innerHTML = ''
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
+  while (puzzle.firstChild) {
+    puzzle.removeChild(puzzle.firstChild);
   }
-  const grid = document.createElement('UL');
-  grid.className = 'grid';
-  const html = allGuesses.map((guess, index) =>
-    `<li data-index="${index}" ${guess.userValue ? 'class="user-input"' : null}>
-      <input type="number" 
-        maxlength='1' 
-        value="${allGuesses[index].value || ''}"
-        pattern="[0-9]{1}">
-    </li>`).join('');
-  grid.innerHTML = html;
-  container.appendChild(grid);
+  const html = allGuesses.map((guess, index) => {
+    let val;
+    let classes = 'h4';
+    if (guess.visible) {
+      val = guess.value;
+      classes += ' game-value';
+    } else if (guess.userValue) {
+      val = guess.userValue;
+      classes += ' user-value';
+    } else {
+      val = '';
+    }
+    return (
+      `<li class="${classes}">
+        <input type="number" 
+          maxlength='1' 
+          value="${val}"
+          pattern="[0-9]{1}">
+      </li>`);
+  }).join('');
+  puzzle.innerHTML = html;
 };
 
 // Guess Logic
 // =================================================================================================
-const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward }) => {
+const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward, diff, gameIndex }) => {
   if (guessIndex < limit) {
     // use the current `guessIndex` value to get a guess from allGuesses
     const currentGuess = allGuesses[guessIndex];
@@ -132,7 +176,8 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward }) => {
             allGuesses,
             guessIndex,
             limit,
-            forward: true
+            forward: true,
+            gameIndex,
           });
         } else {
           guessIndex--;
@@ -141,7 +186,8 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward }) => {
             allGuesses,
             guessIndex,
             limit,
-            forward: false
+            forward: false,
+            gameIndex,
           });
         }
       }
@@ -161,7 +207,8 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward }) => {
               allGuesses,
               guessIndex,
               limit,
-              forward: true
+              forward: true,
+              gameIndex
             });
           }
         }
@@ -177,16 +224,22 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward }) => {
       allGuesses,
       guessIndex, 
       limit,
-      forward: false
+      forward: false,
+      gameIndex,
     });
   }
-  return doMarkup( allGuesses );
+  return doMarkup({
+    allGuesses,
+    gameIndex
+  });
 };
 
 // Puzzle Starter
 // =================================================================================================
-const init = function (run) {
-  const state = getInitialState(3);
+const init = function (run = 3, diff = 0) {
+  // diff easy 1 through expert 4
+  const state = getInitialState(3, diff);
+  console.log(state);
 
   // generate a solved puzzle
   if (run === 1) {
@@ -195,20 +248,20 @@ const init = function (run) {
     document.querySelectorAll('li').forEach((li, index) => {
       if (li.classList.contains('user-input')) {
         const val = li.querySelector('input').value;
-        // console.log('cell ' + y + ' has value ' + li)
         state.allGuesses[index].value = parseInt(val, 10);
         state.allGuesses[index].userValue = parseInt(val, 10);
-        // console.log(allGuesses[y]);
       }
     });
     return makeGuess(state);
-  } else if (run === 3) {
-    doMarkup(createSequencedArray(81));
-    initUI();
+  } else {
+    doMarkup({
+      allGuesses: createSequencedArray(81),
+    });
+    addListeners();
   }
 };
 
 // Start her up
 // =================================================================================================
-doMarkup(createSequencedArray(81));
-initUI();
+init();
+addListeners();

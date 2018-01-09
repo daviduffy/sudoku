@@ -1,19 +1,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sudoku Advanced</title>
+  <title>Sudoku Magician</title>
   <meta name="description" content="Advanced Sudoku Generator">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <main>
-  <h1>Sudoku</h1>
-  <p>Touch or click to enter numbers and solve any existing sudoku</p>
-  <div id="container"></div>
-    <div class="grid control">
-    <button id="run_puzzle" onclick="init(2);">Generate Sudoku</button>
-    <button id="clear_puzzle" onclick="init(3);">Clear puzzle</button>
-    </div>
+  <main class="container">
+    <header class="header">
+      <h1 class="h1">Sudoku Magician</h1>
+      <p>Play sudoku on any difficulty, or enter numbers from the newspaper if you're too lazy to solve it yourself!</p>
+    </header>
+    <ul id="puzzle" class="puzzle"></ul>
+    <aside id="controls" class="controls">
+      <button id="run" class="h4 btn btn--action" onclick="init(2);">Generate Sudoku</button>
+      <button id="clear" class="h4 btn" onclick="init(3);">Clear puzzle</button>
+      <button id="easy" class="h4 btn--action btn--easy" onclick="init(2, 1);">Easy</button>
+      <button id="medium" class="h4 btn--action btn--medium" onclick="init(2, 2);">Medium</button>
+      <button id="hard" class="h4 btn--action btn--hard" onclick="init(2, 3);">Hard</button>
+    </aside>
   </main>
   <script src="js/app.js"></script>
 </body>
