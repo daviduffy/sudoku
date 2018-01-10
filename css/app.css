@@ -38,39 +38,49 @@
   }
 }
 
-.h4 {
+.h4,
+.puzzle li {
   font-size: 1.13849rem;
 }
 
 @media screen and (min-width: 37.5rem) {
-  .h4 {
+  .h4,
+  .puzzle li {
     font-size: calc(1.13849rem + .42401 * ((100vw - 37.5rem)/ 42.5));
   }
 }
 @media screen and (min-width: 80rem) {
-  .h4 {
+  .h4,
+  .puzzle li {
     font-size: 1.5625rem;
   }
 }
 
 .puzzle {
-  display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  width: calc(100vw - 1rem);
-  height: calc(100vw - 1rem);
-  margin: 0 auto;
   padding: 0;
 }
+
+.puzzle,
+.controls {
+  display: grid;
+  margin: 0 auto;
+  width: calc(100vw - 1rem);
+  height: calc(100vw - 1rem);
+}
 @media screen and (min-width: 37.5rem) {
-  .puzzle {
+  .puzzle,
+  .controls {
     width: calc(600px + 2vw);
     height: calc(600px + 2vw);
   }
 }
-
 .controls {
-  padding: 1rem 0;
+  grid-template-columns: 1fr 1fr;
+}
+.control {
+  
 }
 
 input[type=number]::-webkit-inner-spin-button, 

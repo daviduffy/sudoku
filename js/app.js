@@ -43,7 +43,7 @@ const getGameIndex = ({ limit, diff }) => {
 
 // Initial State
 // =================================================================================================
-const getInitialState = (num, diff = undefined) => {
+const getInitialState = ({ cellWidth: num, diff }) => {
   // when defined, difficulty causes value visibility to change
   const init = {
     cellWidth: num,
@@ -59,7 +59,7 @@ const getInitialState = (num, diff = undefined) => {
   };
   // fast way to create an array of these objects
   const allGuesses = Array(init.limit).fill(null).map((e, index) => ({
-    options: createSequencedArray(init.sideLength), // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    options: createSequencedArray(init.sideLength),
     value: null,
     visible: diff ? init.gameIndex.includes(index) : true,
     index,
@@ -78,7 +78,8 @@ const addListeners = () => {
       // this is jank
       if (['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'].includes(e.key)) {
         input.value = e.key;
-        input.parentNode.classList.add('user-input');
+        input.parentNode.classList.add('user-value');
+        console.log(e.key);
       }
     });
   });
@@ -128,7 +129,7 @@ const getXYSquare = ({ sideLength, allGuesses, guessIndex }) => {
 
 // Create the markup with values from guesses
 // =================================================================================================
-const doMarkup = ({ allGuesses, gameIndex }) => {
+const doMarkup = ({ allGuesses, gameIndex, diff }) => {
   const puzzle = document.getElementById('puzzle');
   // empty the container. faster than innerHTML = ''
   while (puzzle.firstChild) {
@@ -136,18 +137,25 @@ const doMarkup = ({ allGuesses, gameIndex }) => {
   }
   const html = allGuesses.map((guess, index) => {
     let val;
-    let classes = 'h4';
-    if (guess.visible) {
-      val = guess.value;
-      classes += ' game-value';
+    const classes = [];
+    // if difficulty is specified only output based on visible prop
+    if (diff) {
+      if (guess.visible) {
+        val = guess.value;
+        classes.push('game-value');
+      } else {
+        val = '';
+      }
+    // if difficulty not specified
     } else if (guess.userValue) {
       val = guess.userValue;
-      classes += ' user-value';
+      classes.push('user-value');
     } else {
-      val = '';
+      val = guess.value;
     }
+    
     return (
-      `<li class="${classes}">
+      `<li ${classes.length > 0 ? `class="${classes.join(' ')}"` : ''}>
         <input type="number" 
           maxlength='1' 
           value="${val}"
@@ -155,6 +163,7 @@ const doMarkup = ({ allGuesses, gameIndex }) => {
       </li>`);
   }).join('');
   puzzle.innerHTML = html;
+  addListeners();
 };
 
 // Guess Logic
@@ -178,6 +187,7 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward, diff, g
             limit,
             forward: true,
             gameIndex,
+            diff
           });
         } else {
           guessIndex--;
@@ -188,6 +198,7 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward, diff, g
             limit,
             forward: false,
             gameIndex,
+            diff
           });
         }
       }
@@ -208,7 +219,8 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward, diff, g
               guessIndex,
               limit,
               forward: true,
-              gameIndex
+              gameIndex,
+              diff
             });
           }
         }
@@ -222,31 +234,35 @@ const makeGuess = ({ sideLength, allGuesses, guessIndex, limit, forward, diff, g
     return makeGuess({
       sideLength,
       allGuesses,
-      guessIndex, 
+      guessIndex,
       limit,
       forward: false,
       gameIndex,
+      diff
     });
   }
   return doMarkup({
     allGuesses,
-    gameIndex
+    gameIndex,
+    diff
   });
 };
 
+// Clears
+// =================================================================================================
+
+
 // Puzzle Starter
 // =================================================================================================
-const init = function (run = 3, diff = 0) {
+const init = ({ clear = false, diff = undefined, preserveUserInput = false }) => {
   // diff easy 1 through expert 4
-  const state = getInitialState(3, diff);
+  const state = getInitialState({ cellWidth: 3, diff });
   console.log(state);
 
-  // generate a solved puzzle
-  if (run === 1) {
-    return makeGuess(state);
-  } else if (run === 2) {
+  if (!clear) {
+    // add user input to allGuesses array before guessing anything
     document.querySelectorAll('li').forEach((li, index) => {
-      if (li.classList.contains('user-input')) {
+      if (li.classList.contains('user-value')) {
         const val = li.querySelector('input').value;
         state.allGuesses[index].value = parseInt(val, 10);
         state.allGuesses[index].userValue = parseInt(val, 10);
@@ -254,14 +270,22 @@ const init = function (run = 3, diff = 0) {
     });
     return makeGuess(state);
   } else {
-    doMarkup({
-      allGuesses: createSequencedArray(81),
-    });
+    if (preserveUserInput) {
+      Array.from(document
+        .querySelectorAll('li'))
+        .filter(li => !li.classList.contains('user-value'))
+        .forEach(li => {li.querySelector('input').value = '';})
+    } else {
+      doMarkup({
+        allGuesses: createSequencedArray(81),
+        diff
+      });
+    }
     addListeners();
   }
 };
 
 // Start her up
 // =================================================================================================
-init();
+init({ clear: true });
 addListeners();
