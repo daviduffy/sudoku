@@ -1,0 +1,93 @@
+.Sudoku
+  display: grid
+  grid-template-rows: 1fr 106px
+  grid-template-columns: 1fr
+  box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.35);
+  margin: auto
+  width: calc(100vw - 1rem)
+  height: calc(100vw - 1rem + 106px)
+  @media screen and (min-width: 700px)
+    grid-template-rows: 1fr
+    grid-template-columns: 1fr 180px
+    width: calc(780px + 2vw)
+    height: calc(600px + 2vw)
+
+.Sudoku__puzzle
+  display: grid
+  grid-template-columns: repeat(9, 1fr)
+  grid-template-rows: repeat(9, 1fr)
+  padding: 0
+  margin: 0
+  @media screen and (min-width: 700px)
+    grid-row: 1
+    grid-column: 1/2
+
+.Sudoku__controls
+  width: calc(100vw - 1rem)
+  background-color: #ecf0f1
+  @media screen and (min-width: 700px)
+    grid-row: 1
+    grid-column: 2/3
+    display: grid
+    grid-template-rows: 1fr 1fr
+    width: 180px
+
+.controls
+
+.controls__group
+  display: grid
+  grid-auto-flow: column
+  @media screen and (min-width: 700px)
+    grid-auto-flow: row
+
+
+li
+  display: inline-block
+  position: relative
+  border-top: 1px solid #bdc3c7
+  border-left: 1px solid #bdc3c7
+                        // this is ugly, but it creates the grid */
+li:nth-child(-n + 9)
+  border-top: 0
+li:nth-child(9n + 1)                 // left side of grid
+  border-left: 0
+li:nth-child(3n)
+  border-right: 2px solid #888       // heavy column */
+li:nth-child(n+19)
+  border-bottom: 2px solid #888      // heavy row top */
+li:nth-child(n+28)
+  border-bottom: none             // row cancel */
+li:nth-child(n+46)
+  border-bottom: 2px solid #888      // heavy row bottom */
+li:nth-child(n+55)
+  border-bottom: none             // row cancel */
+li:nth-child(9n)
+  border-right: 0                    // right side of grid
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button 
+  -webkit-appearance: none 
+  margin: 0 
+
+input[type="number"]
+  display: inline-block
+  position: absolute
+  margin: auto
+  top: 0
+  right: 0
+  bottom: 0
+  left: 0
+  font-size: inherit
+  border: none
+  padding: 33%
+  width: 95%
+  height: 95%
+
+.game-value input,
+.user-value input
+  font-weight: bold
+
+.game-value input
+  color: black
+.user-value input
+  color: #2980b9

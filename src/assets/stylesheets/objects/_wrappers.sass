@@ -1,0 +1,14 @@
+.container
+  height: 100vh
+  width: 100vw
+  display: grid
+  align-content: center
+  justify-content: center
+  background: #fff
+  font-size: 1.067rem
+  color: #444
+  text-align: center
+  @media screen and (min-width: 37.5rem)
+    font-size: calc(1.067rem + .183 * ((100vw - 37.5rem)/ 42.5))
+  @media screen and (min-width: 80rem)
+    font-size: 1.25rem
